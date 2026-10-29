@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PR Guardian</title>
+<style>
+:root{--bg:#0b0f17;--card:#131a26;--bd:#223049;--tx:#e6edf6;--mut:#8aa0b8;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--acc:#76b900}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 18px 60px}
+h1{margin:0 0 4px;font-size:28px}h1 span{color:var(--acc)}
+.sub{color:var(--mut);margin-bottom:22px}
+.row{display:flex;gap:8px}
+input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:15px}
+button{padding:12px 20px;border:0;border-radius:10px;background:var(--acc);color:#0b0f17;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.chips{margin:10px 0 22px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--bd);background:transparent;color:var(--mut);font-weight:500}
+.chip:hover{color:var(--tx);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.04em}
+.approve{background:#12351f;color:var(--ok)}.request_changes{background:#3a2a0a;color:var(--warn)}.block{background:#3b1313;color:var(--bad)}
+.bar{height:8px;border-radius:99px;background:#1c273a;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%}
+.f{border-left:3px solid var(--bd);padding:8px 12px;margin:8px 0;background:#0f1522;border-radius:0 8px 8px 0}
+.sev{font-size:11px;font-weight:800;text-transform:uppercase;margin-right:8px}
+.critical,.high{color:var(--bad)}.medium{color:var(--warn)}.low{color:var(--mut)}
+pre{background:#0a0e16;border:1px solid var(--bd);border-radius:8px;padding:10px;overflow:auto;font-size:12px;max-height:220px;white-space:pre-wrap}
+.t{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #1a2438;font-size:14px}
+.t b{color:var(--acc);min-width:150px}.t .s{color:var(--mut);min-width:48px}
+.err{border-color:var(--bad);color:#fca5a5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.row{flex-direction:column}}
+ul{margin:6px 0 0 18px;padding:0}
+</style></head><body><div class="wrap">
+<h1>PR <span>Guardian</span></h1>
+<div class="sub">Autonomous pre-merge reviewer: sandboxed tests, security scan, and NVIDIA Nemotron on Nebius Token Factory. Humans make the final call.</div>
+<div class="card" style="border-color:#76b900"><b>Replay mode.</b> This page shows saved outputs from real PR Guardian runs on three demo PRs. Live reviews need Docker and run locally; see the README.</div>
+<div class="row"><input id="url" placeholder="https://github.com/owner/repo/pull/1"><button id="btn" onclick="run()">Review PR</button></div>
+<div class="chips" id="chips"></div>
+<div id="out"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const DEMOS = [
+  ["Clean PR", "https://github.com/Babarkhan01/pg-demo-clean/pull/1"],
+  ["Missing-test PR", "https://github.com/Babarkhan01/pg-demo-missing-test/pull/1"],
+  ["Security-risk PR", "https://github.com/Babarkhan01/pg-demo-security-risk/pull/1"]
+];
+DEMOS.forEach(([label, u]) => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = label;
+  b.onclick = () => { $("url").value = u; run(); };
+  $("chips").appendChild(b);
+});
+function esc(s){ const d = document.createElement("div"); d.textContent = (s == null ? "" : String(s)); return d.innerHTML; }
+async function run(){
+  const url = $("url").value.trim(); if(!url) return;
+  $("btn").disabled = true;
+  $("out").innerHTML = '<div class="card">Agent working: fetching PR, scanning diff, running tests in Docker, asking Nemotron...</div>';
+  try{
+    const m = url.match(/github\.com\/[^/]+\/([^/]+)\/pull\/(\d+)/);
+    if(!m) throw new Error("Replay demo: use one of the three demo buttons.");
+    const r = await fetch("reports/" + m[1] + "-" + m[2] + ".json");
+    if(!r.ok) throw new Error("This replay page only includes the three demo PRs. Live reviews run locally (see the README).");
+    const d = await r.json();
+    render(d);
+  }catch(e){ $("out").innerHTML = '<div class="card err">' + esc(e.message) + '</div>'; }
+  $("btn").disabled = false;
+}
+function render(d){
+  const r = d.report, t = d.tests, s = d.scan;
+  const col = r.risk_score >= 70 ? "var(--bad)" : r.risk_score >= 35 ? "var(--warn)" : "var(--ok)";
+  let h = "";
+  if(r.confidence === 0) h += '<div class="card err"><b>Analysis failed:</b> the model output could not be parsed. Treat this PR as UNREVIEWED, not as a verdict.</div>';
+  h += '<div class="card"><h3>Decision: ' + esc(d.pr.repo) + ' #' + d.pr.number + '</h3><span class="badge ' + esc(r.decision) + '">' + esc(r.decision.replace("_", " ")) + '</span> <span style="color:var(--mut);margin-left:10px">risk ' + r.risk_score + '/100 | confidence ' + r.confidence + ' | ' + d.runtime_s + 's</span><div class="bar"><i style="width:' + r.risk_score + '%;background:' + col + '"></i></div><p>' + esc(r.summary) + '</p></div>';
+  if(r.findings.length){
+    h += '<div class="card"><h3>Findings</h3>' + r.findings.map(f => '<div class="f"><span class="sev ' + esc(f.severity) + '">' + esc(f.severity) + '</span><b>' + esc(f.file) + (f.line ? ":" + esc(f.line) : "") + '</b><div>' + esc(f.issue) + '</div><div style="color:var(--mut)">Why it matters: ' + esc(f.why_it_matters) + '</div><div>Fix: ' + esc(f.suggested_fix) + '</div></div>').join("") + '</div>';
+  }
+  const lst = (title, a) => a.length ? '<div class="card"><h3>' + title + '</h3><ul>' + a.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul></div>' : "";
+  h += '<div class="grid">' + lst("Missing tests", r.missing_tests) + lst("Security issues", r.security_issues) + '</div>';
+  if(r.suggested_patch) h += '<div class="card"><h3>Suggested patch (needs human approval)</h3><pre>' + esc(r.suggested_patch) + '</pre></div>';
+  h += '<div class="card"><h3>Sandbox tests (network off): ' + esc(t.status) + '</h3><pre>' + esc(t.output || "(no output)") + '</pre></div>';
+  h += '<div class="card"><h3>Scanner evidence</h3>' + (s.findings.length ? s.findings.map(f => '<div class="f"><span class="sev ' + esc(f.severity) + '">' + esc(f.severity) + '</span>' + esc(f.rule) + ' in ' + esc(f.file) + '<pre>' + esc(f.evidence) + '</pre></div>').join("") : '<span style="color:var(--mut)">No risky patterns found.</span>') + '</div>';
+  h += '<div class="card"><h3>Agent trace</h3>' + d.trace.map(x => '<div class="t"><span class="s">' + x.t + 's</span><b>' + esc(x.step) + '</b><span>' + esc(x.detail) + '</span></div>').join("") + '</div>';
+  $("out").innerHTML = h;
+}
+</script></body></html>

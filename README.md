@@ -6,6 +6,8 @@ Built for the Nebius x NVIDIA Global AI Hackathon, Coding and Agentic Engineerin
 
 Demo video: ADD_YOUTUBE_LINK_HERE
 
+Replay demo (saved real runs of the three demo PRs): https://babarkhan01.github.io/pr-guardian/
+
 ## What it does
 
 1. Fetches PR metadata and the unified diff from the GitHub API.

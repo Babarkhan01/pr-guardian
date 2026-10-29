@@ -1,0 +1,69 @@
+{
+  "pr": {
+    "owner": "Babarkhan01",
+    "repo": "pg-demo-missing-test",
+    "number": 1,
+    "title": "Add bulk discount tiers"
+  },
+  "tests": {
+    "status": "passed",
+    "exit_code": 0,
+    "output": "..                                                                       [100%]\n2 passed in 0.01s\n"
+  },
+  "scan": {
+    "findings": [],
+    "dependency_changes": [],
+    "changed_files": [
+      "shop.py"
+    ],
+    "source_changed_without_tests": true,
+    "has_critical": false
+  },
+  "report": {
+    "decision": "request_changes",
+    "risk_score": 45,
+    "summary": "Added bulk_discount function but lacks tests and input validation.",
+    "findings": [
+      {
+        "severity": "medium",
+        "file": "shop.py",
+        "line": "7",
+        "issue": "bulk_discount does not validate quantity input; negative quantities would incorrectly apply discount.",
+        "why_it_matters": "Could produce incorrect pricing for invalid input.",
+        "suggested_fix": "Add check that quantity >= 0, raise ValueError otherwise."
+      }
+    ],
+    "missing_tests": [
+      "bulk_discount returns the original price when quantity is less than 10.",
+      "bulk_discount applies a 10% discount when quantity is between 10 and 99 inclusive.",
+      "bulk_discount applies a 20% discount when quantity is 100 or greater.",
+      "bulk_discount raises ValueError for negative quantity."
+    ],
+    "security_issues": [],
+    "suggested_patch": "```diff\ndef bulk_discount(price, quantity):\n    if quantity < 0:\n        raise ValueError(\"quantity must be non-negative\")\n    if quantity >= 100:\n        return round(price * 0.8, 2)\n    if quantity >= 10:\n        return round(price * 0.9, 2)\n    return price\n```",
+    "confidence": 0.9
+  },
+  "trace": [
+    {
+      "t": 1.1,
+      "step": "fetch_pr",
+      "detail": "Add bulk discount tiers (1 files)"
+    },
+    {
+      "t": 1.1,
+      "step": "security_scan",
+      "detail": "0 findings, critical=False"
+    },
+    {
+      "t": 5.7,
+      "step": "docker_tests",
+      "detail": "passed (exit 0)"
+    },
+    {
+      "t": 12.6,
+      "step": "nemotron_review",
+      "detail": "decision=request_changes, risk=45"
+    }
+  ],
+  "runtime_s": 12.6
+}
