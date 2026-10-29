@@ -6,3 +6,7 @@ __pycache__/
 backend/selftest.py
 server.log
 push.sh
+
+.DS_Store
+*.pyc
+media/

@@ -4,9 +4,13 @@ PR Guardian is an agentic first-pass code reviewer for GitHub pull requests. It 
 
 Built for the Nebius x NVIDIA Global AI Hackathon, Coding and Agentic Engineering track.
 
-Demo video: ADD_YOUTUBE_LINK_HERE
+[![PR Guardian demo video](https://img.youtube.com/vi/m6RuuVhl0Qk/maxresdefault.jpg)](https://www.youtube.com/watch?v=m6RuuVhl0Qk)
 
-Replay demo (saved real runs of the three demo PRs): https://babarkhan01.github.io/pr-guardian/
+[Watch the 2-minute demo](https://www.youtube.com/watch?v=m6RuuVhl0Qk) — the problem, the pipeline, three real reviews, and the design limits. No music; the steps are also captioned on screen, so it works muted.
+
+Replay demo (saved outputs of the three real runs): https://babarkhan01.github.io/pr-guardian/
+
+The replay page is static: it serves the saved JSON reports in `docs/reports/`. To run the full pipeline (GitHub API, Docker sandbox, Token Factory inference) use the local instructions below.
 
 ## What it does
 
@@ -33,6 +37,18 @@ Replay demo (saved real runs of the three demo PRs): https://babarkhan01.github.
 - Docker (Colima on macOS) for the test sandbox
 - Nebius Token Factory (OpenAI-compatible API)
 - NVIDIA Nemotron-3-Super-120B-A12B (Nemotron-3-Nano-30B-A3B also tested)
+
+## How NVIDIA Nemotron and Nebius Token Factory are used
+
+**Model.** `nvidia/nemotron-3-super-120b-a12b` through Token Factory's OpenAI-compatible endpoint (`NEBIUS_BASE_URL=https://api.tokenfactory.nebius.com/v1/`). The model is selected with `NEMOTRON_MAIN_MODEL`, so Nano can be swapped in for cheaper runs without code changes.
+
+**What the model receives.** The masked unified diff (first 40,000 characters), the pytest output from the Docker sandbox, the deterministic scanner findings, and the PR title and description. Secrets are redacted before this payload is built, and the PR text is wrapped as untrusted data in the system prompt.
+
+**What it returns.** A single JSON object (`response_format: json_object`, temperature 0.2): decision, risk score, findings with file and line, why each issue matters, a suggested fix, missing tests, security issues, an optional patch, and a confidence value. The schema is validated before anything reaches the UI.
+
+**Where Token Factory accelerated the work.** One key and one OpenAI-compatible endpoint replaced GPU provisioning, model serving, and an inference server. `response_format: json_object` removed the usual prompt-engineering fight for parseable output, and the same SDK call works for both Super and Nano. A full review — fetch, scan, Docker tests, model call — completes in about 13-14 seconds end to end, so the whole loop stayed inside one demo.
+
+**Who decides.** Deterministic tools produce the evidence; the model explains and prioritizes it. A critical scanner finding forces `block` and failing tests block `approve` regardless of what the model says, so the model cannot wave through a secret or a failing suite.
 
 ## Run it locally
 
@@ -76,9 +92,17 @@ These are three seeded scenarios built to exercise the pipeline. They show that 
 
 ## Hackathon compliance
 
-- Inference runs on Nebius Token Factory.
-- Uses NVIDIA Nemotron open models.
+- Inference runs on Nebius Token Factory at runtime (`backend/services/nebius_client.py`, `backend/agent/orchestrator.py`).
+- Uses NVIDIA Nemotron open models (Nemotron-3-Super, with Nemotron-3-Nano tested).
 - Open-source repository with an MIT license.
+- Built for the Coding and Agentic Engineering track of the Nebius x NVIDIA Global AI Hackathon.
+- This repository was created during the submission period: the agent, the FastAPI UI, the replay page, the three demo repositories, and the demo video were all produced as part of the submission.
+
+## Judge quick path
+
+1. Watch the demo video, or open the replay demo above (no setup, no keys) to see the three saved runs.
+2. Or run it locally with your own keys and Docker, then paste any public Python PR URL.
+3. Command line for a single review: `python -m backend.agent.orchestrator <PR_URL>`.
 
 ## License
 
