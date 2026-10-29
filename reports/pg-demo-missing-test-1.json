@@ -1,0 +1,63 @@
+{
+  "pr": {
+    "owner": "Babarkhan01",
+    "repo": "pg-demo-missing-test",
+    "number": 1,
+    "title": "Add bulk discount tiers"
+  },
+  "tests": {
+    "status": "passed",
+    "exit_code": 0,
+    "output": "..                                                                       [100%]\n2 passed in 0.01s\n"
+  },
+  "scan": {
+    "findings": [],
+    "dependency_changes": [],
+    "changed_files": [
+      "shop.py"
+    ],
+    "source_changed_without_tests": true,
+    "has_critical": false
+  },
+  "report": {
+    "decision": "request_changes",
+    "risk_score": 10,
+    "summary": "Adds bulk_discount function implementing tiered discounts for quantities >=10 and >=100. No existing code modified; tests pass but no new tests added for the new function.",
+    "findings": [],
+    "missing_tests": [
+      "shop.py:bulk_discount",
+      "Source changed without test changes"
+    ],
+    "security_issues": [],
+    "suggested_patch": "",
+    "confidence": 0.95
+  },
+  "trace": [
+    {
+      "t": 1.2,
+      "step": "fetch_pr",
+      "detail": "Add bulk discount tiers (1 files)"
+    },
+    {
+      "t": 1.2,
+      "step": "security_scan",
+      "detail": "0 findings, critical=False"
+    },
+    {
+      "t": 5.6,
+      "step": "docker_tests",
+      "detail": "passed (exit 0)"
+    },
+    {
+      "t": 22.1,
+      "step": "nemotron_review",
+      "detail": "decision=approve, risk=10"
+    },
+    {
+      "t": 22.1,
+      "step": "guardrail",
+      "detail": "source changed without tests forced request_changes"
+    }
+  ],
+  "runtime_s": 22.1
+}

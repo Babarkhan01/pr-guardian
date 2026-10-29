@@ -1,0 +1,56 @@
+{
+  "pr": {
+    "owner": "Babarkhan01",
+    "repo": "pg-demo-clean",
+    "number": 1,
+    "title": "Add add_tax helper"
+  },
+  "tests": {
+    "status": "passed",
+    "exit_code": 0,
+    "output": "...                                                                      [100%]\n3 passed in 0.01s\n"
+  },
+  "scan": {
+    "findings": [],
+    "dependency_changes": [],
+    "changed_files": [
+      "shop.py",
+      "test_shop.py"
+    ],
+    "source_changed_without_tests": false,
+    "has_critical": false
+  },
+  "report": {
+    "decision": "approve",
+    "risk_score": 5,
+    "summary": "Adds simple tax helper with unit test; all tests pass; no security concerns.",
+    "findings": [],
+    "missing_tests": [],
+    "security_issues": [],
+    "suggested_patch": "",
+    "confidence": 0.95
+  },
+  "trace": [
+    {
+      "t": 1.2,
+      "step": "fetch_pr",
+      "detail": "Add add_tax helper (2 files)"
+    },
+    {
+      "t": 1.2,
+      "step": "security_scan",
+      "detail": "0 findings, critical=False"
+    },
+    {
+      "t": 5.9,
+      "step": "docker_tests",
+      "detail": "passed (exit 0)"
+    },
+    {
+      "t": 11.4,
+      "step": "nemotron_review",
+      "detail": "decision=approve, risk=5"
+    }
+  ],
+  "runtime_s": 11.4
+}

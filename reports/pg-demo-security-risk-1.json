@@ -1,0 +1,75 @@
+{
+  "pr": {
+    "owner": "Babarkhan01",
+    "repo": "pg-demo-security-risk",
+    "number": 1,
+    "title": "Add user lookup"
+  },
+  "tests": {
+    "status": "passed",
+    "exit_code": 0,
+    "output": "..                                                                       [100%]\n2 passed in 0.01s\n"
+  },
+  "scan": {
+    "findings": [
+      {
+        "rule": "hardcoded_secret",
+        "severity": "critical",
+        "file": "db.py",
+        "evidence": "[REDACTED]"
+      },
+      {
+        "rule": "sql_fstring",
+        "severity": "critical",
+        "file": "db.py",
+        "evidence": "cursor.[REDACTED] * FROM users WHERE name = '{name}'\")"
+      }
+    ],
+    "dependency_changes": [],
+    "changed_files": [
+      "db.py"
+    ],
+    "source_changed_without_tests": true,
+    "has_critical": true
+  },
+  "report": {
+    "decision": "block",
+    "risk_score": 90,
+    "summary": "Model output could not be parsed.",
+    "findings": [],
+    "missing_tests": [],
+    "security_issues": [
+      "Critical secret/injection pattern detected by scanner"
+    ],
+    "suggested_patch": "",
+    "confidence": 0.0
+  },
+  "trace": [
+    {
+      "t": 1.2,
+      "step": "fetch_pr",
+      "detail": "Add user lookup (1 files)"
+    },
+    {
+      "t": 1.2,
+      "step": "security_scan",
+      "detail": "2 findings, critical=True"
+    },
+    {
+      "t": 6.1,
+      "step": "docker_tests",
+      "detail": "passed (exit 0)"
+    },
+    {
+      "t": 26.0,
+      "step": "nemotron_review",
+      "detail": "decision=request_changes, risk=50"
+    },
+    {
+      "t": 26.0,
+      "step": "guardrail",
+      "detail": "scanner critical finding forced decision=block"
+    }
+  ],
+  "runtime_s": 26.0
+}
