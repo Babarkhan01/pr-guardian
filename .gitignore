@@ -5,3 +5,4 @@ __pycache__/
 .work/
 backend/selftest.py
 server.log
+push.sh
