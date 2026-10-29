@@ -23,12 +23,12 @@
   "report": {
     "decision": "approve",
     "risk_score": 5,
-    "summary": "Adds simple tax helper with unit test; all tests pass; no security concerns.",
+    "summary": "Adds add_tax helper with unit test; all tests pass; no security concerns.",
     "findings": [],
     "missing_tests": [],
     "security_issues": [],
     "suggested_patch": "",
-    "confidence": 0.95
+    "confidence": 0.98
   },
   "trace": [
     {
@@ -42,15 +42,15 @@
       "detail": "0 findings, critical=False"
     },
     {
-      "t": 5.9,
+      "t": 6.0,
       "step": "docker_tests",
       "detail": "passed (exit 0)"
     },
     {
-      "t": 11.4,
+      "t": 9.6,
       "step": "nemotron_review",
       "detail": "decision=approve, risk=5"
     }
   ],
-  "runtime_s": 11.4
+  "runtime_s": 9.6
 }

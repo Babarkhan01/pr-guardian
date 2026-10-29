@@ -13,8 +13,8 @@ PATTERNS = {
 }
 
 def mask(text: str) -> str:
-    for pat, _ in PATTERNS.values():
-        text = re.sub(pat, "[REDACTED]", text)
+    for name in ("hardcoded_secret", "sk_style_key", "aws_key", "private_key"):
+        text = re.sub(PATTERNS[name][0], "[REDACTED]", text)
     return text
 
 def scan_diff(diff: str) -> dict:

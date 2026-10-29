@@ -4,3 +4,4 @@ __pycache__/
 .work/
 .work/
 backend/selftest.py
+server.log

@@ -22,7 +22,7 @@
         "rule": "sql_fstring",
         "severity": "critical",
         "file": "db.py",
-        "evidence": "cursor.[REDACTED] * FROM users WHERE name = '{name}'\")"
+        "evidence": "cursor.execute(f\"SELECT * FROM users WHERE name = '{name}'\")"
       }
     ],
     "dependency_changes": [],
@@ -34,15 +34,36 @@
   },
   "report": {
     "decision": "block",
-    "risk_score": 90,
-    "summary": "Model output could not be parsed.",
-    "findings": [],
-    "missing_tests": [],
-    "security_issues": [
-      "Critical secret/injection pattern detected by scanner"
+    "risk_score": 85,
+    "summary": "Introduces a SQL injection vulnerability via f-string and contains a hardcoded secret, both critical security issues.",
+    "findings": [
+      {
+        "severity": "critical",
+        "file": "db.py",
+        "line": "7",
+        "issue": "SQL injection vulnerability via f-string",
+        "why_it_matters": "Attacker can inject arbitrary SQL leading to data breach or data loss.",
+        "suggested_fix": "Use parameterized query: cursor.execute(\"SELECT * FROM users WHERE name = ?\", (name,))"
+      },
+      {
+        "severity": "critical",
+        "file": "db.py",
+        "line": "3",
+        "issue": "Hardcoded secret in source code",
+        "why_it_matters": "Secret exposed if repository is public, leading to unauthorized access.",
+        "suggested_fix": "Remove hardcoded secret and load it from environment variable or secure config."
+      }
     ],
-    "suggested_patch": "",
-    "confidence": 0.0
+    "missing_tests": [
+      "find_user returns the correct user row when a matching name exists in the database.",
+      "find_user safely handles input containing SQL injection attempts without altering database state."
+    ],
+    "security_issues": [
+      "SQL injection vulnerability via f-string",
+      "Hardcoded secret in source code"
+    ],
+    "suggested_patch": "```diff\n-    cursor.execute(f\"SELECT * FROM users WHERE name = '{name}'\")\n+    cursor.execute(\"SELECT * FROM users WHERE name = ?\", (name,))\n```",
+    "confidence": 0.95
   },
   "trace": [
     {
@@ -56,20 +77,15 @@
       "detail": "2 findings, critical=True"
     },
     {
-      "t": 6.1,
+      "t": 5.7,
       "step": "docker_tests",
       "detail": "passed (exit 0)"
     },
     {
-      "t": 26.0,
+      "t": 13.4,
       "step": "nemotron_review",
-      "detail": "decision=request_changes, risk=50"
-    },
-    {
-      "t": 26.0,
-      "step": "guardrail",
-      "detail": "scanner critical finding forced decision=block"
+      "detail": "decision=block, risk=85"
     }
   ],
-  "runtime_s": 26.0
+  "runtime_s": 13.4
 }

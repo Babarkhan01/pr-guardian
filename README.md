@@ -48,11 +48,11 @@ Command line: `python -m backend.agent.orchestrator <PR_URL>` writes a JSON repo
 
 ## Demo scenarios
 
-| Repo | Scenario | Expected | Result |
-|---|---|---|---|
-| pg-demo-clean | Small change with tests updated | approve | see reports/ |
-| pg-demo-missing-test | New logic, no tests | request_changes | see reports/ |
-| pg-demo-security-risk | Hardcoded key and SQL injection | block | see reports/ |
+| Repo | Scenario | Expected | Actual | Risk | Confidence | Time |
+|---|---|---|---|---|---|---|
+| pg-demo-clean | Small change with tests updated | approve | approve (match) | 5 | 0.98 | 9.6s |
+| pg-demo-missing-test | New logic, no tests | request_changes | request_changes (match) | 45 | 0.9 | 12.6s |
+| pg-demo-security-risk | Hardcoded key and SQL injection | block | block (match) | 85 | 0.95 | 13.4s |
 
 These are three seeded scenarios built to exercise the pipeline. They show that the pipeline works end to end, not a general accuracy rate.
 
